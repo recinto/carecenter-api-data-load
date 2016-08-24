@@ -23,18 +23,26 @@ def import_organizations(worksheet):
     print "Importing Organizations"
     url = carecenter_config["API_BASE_URL"] + "api/organizations/"
     response = requests.get(url)
-    print response.text
     currentOrgs = response.json()
+
+    # print currentOrgs
 
     rows = worksheet.get_all_records()
     for row in rows:
+        exsists_in_current_orgs = False
         mapped_org = {
             "name": row["Name"],
             "description": row["Description"],
             "web_url": row["WebUrl"]
         }
-        response = requests.post(url, data=mapped_org)
-        print response.text
+        for org in currentOrgs:
+            if org["name"] == row["Name"]:
+                exsists_in_current_orgs = True
+                break
+
+        if not exsists_in_current_orgs:
+            response = requests.post(url, data=mapped_org)
+            print "Added Org [%s]", mapped_org["name"]
 
 
 def import_services(worksheet):
